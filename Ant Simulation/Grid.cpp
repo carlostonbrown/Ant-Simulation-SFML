@@ -55,7 +55,7 @@ void Grid::draw(sf::RenderWindow& window)
 			//draw home pheromone
 
 			float HP = m_homePheromone[gridpos(i,j)];
-			m_homePheromoneColour.a = HP;
+			m_homePheromoneColour.a = HP/4;
 			if (HP > 1)
 			{
 				m_cellShape.setFillColor(m_homePheromoneColour);

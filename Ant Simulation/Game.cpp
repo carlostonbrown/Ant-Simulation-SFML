@@ -6,7 +6,7 @@ const sf::Time Game::TimePerFrame = sf::seconds(1.f / 144.f);
 Game::Game()
     : window(sf::VideoMode(width, height), "Ant Simulation"),
     m_colony(sf::Vector2f(width / 2, height / 2), 100, sf::Color::Red),
-    m_grid(width, height, 10, sf::Color::Blue, sf::Color::Green)
+    m_grid(width, height, 5, sf::Color::Blue, sf::Color::Green)
 {
 
 

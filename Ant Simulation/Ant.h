@@ -17,7 +17,7 @@ private:
     sf::Vector2f m_position;
     sf::Vector2f m_velocity;
     float m_pheromoneAmount;
-    float decay =5;
+    float decay =10;
     float m_speed;
     bool m_hasFood;
 };

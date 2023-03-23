@@ -6,7 +6,7 @@ Ant::Ant(sf::Vector2f position, sf::Vector2f velocity, sf::Color color) :
     m_velocity(velocity),
     m_hasFood(false),
     m_speed(100),
-    m_pheromoneAmount(500)
+    m_pheromoneAmount(1000)
 {
     m_shape.setFillColor(color);
     m_shape.setOrigin(m_shape.getRadius(), m_shape.getRadius());
