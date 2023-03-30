@@ -35,7 +35,11 @@ void Grid::update(sf::Time dt)
 
 	for (float& cell : m_homePheromone)
 	{
-		cell -= decay *dt.asSeconds();
+		if (cell > 0)
+		{
+			cell -= decay * dt.asSeconds();
+		}
+		
 	}
 
 
@@ -103,8 +107,12 @@ void Grid::draw(sf::RenderWindow& window)
 void Grid::addHomePheromone(int x, int y, float amount)
 {
 
+	if (x / m_cellSize <= m_width && y / m_cellSize <= m_height)
+	{
+		m_homePheromone[gridpos(x / m_cellSize, y / m_cellSize)] += amount;
+	}
 
-	m_homePheromone[gridpos(x / m_cellSize, y / m_cellSize)] += amount;
+	
 
 		if (m_homePheromone[gridpos(x / m_cellSize, y / m_cellSize)] > 255)
 		{
