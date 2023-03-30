@@ -19,6 +19,18 @@ Ant::Ant(sf::Vector2f position, sf::Vector2f velocity, sf::Color color) :
 void Ant::update(sf::Time deltaTime,Grid& grid,int width, int height)
 {
 
+
+    //follow pheramones 
+
+    if (m_hasFood)
+    {
+        //follow home pheramones
+    }
+    else
+    {
+        //follow food pheramones
+    }
+
     wander();
 
 

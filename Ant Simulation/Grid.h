@@ -29,7 +29,7 @@ private:
 	std::vector<float> m_walls;
 
 	int gridpos(int x, int y);
-
+	void diffusePheromones(float rate);
 
 
 };

@@ -5,8 +5,8 @@ const sf::Time Game::TimePerFrame = sf::seconds(1.f / 144.f);
 
 Game::Game()
     : window(sf::VideoMode(width, height), "Ant Simulation"),
-    m_colony(sf::Vector2f(width / 2, height / 2), 100, sf::Color::Red),
-    m_grid(width, height, 10, sf::Color::Blue, sf::Color::Green)
+    m_colony(sf::Vector2f(width / 2, height / 2), 200, sf::Color::Red),
+    m_grid(width, height, 7, sf::Color::Blue, sf::Color::Green)
 {
 
 
@@ -28,7 +28,7 @@ void Game::Run()
         {
             timeSinceLastUpdate -= TimePerFrame;
             processEvents();
-            update(TimePerFrame);
+            update(TimePerFrame*m_simSpeed);
         }
         
         render();
@@ -85,8 +85,7 @@ void Game::update(sf::Time deltaTime)
 {
     m_colony.update(deltaTime,m_grid,width,height);
     m_grid.update(deltaTime);
-    // TODO: Update objects here
-    //colony.update(deltaTime);
+
 
 }
 
@@ -107,4 +106,13 @@ void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed)
     // {
     // mIsMovingUp = isPressed;
     // }
+
+    if (key == sf::Keyboard::Period)
+    {
+        m_simSpeed++;
+    }
+    if (key == sf::Keyboard::Comma)
+    {
+        m_simSpeed--;
+    }
 }

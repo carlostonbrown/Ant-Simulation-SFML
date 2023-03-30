@@ -9,9 +9,9 @@ public:
     void Run();
 
 private:
-    int width = 1920;
-    int height = 1080;
-
+    int width = 1000;
+    int height = 1000;
+    float m_simSpeed = 1;
     sf::RenderWindow window;
 
     static const sf::Time TimePerFrame;

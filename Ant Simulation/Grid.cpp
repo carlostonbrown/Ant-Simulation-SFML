@@ -32,6 +32,7 @@ Grid::Grid(int width, int height, int cellSize, sf::Color homePheromoneColour, s
 
 void Grid::update(sf::Time dt)
 {
+	diffusePheromones(0.01);
 
 	for (float& cell : m_homePheromone)
 	{
@@ -41,6 +42,8 @@ void Grid::update(sf::Time dt)
 		}
 		
 	}
+
+	
 
 
 
@@ -59,8 +62,13 @@ void Grid::draw(sf::RenderWindow& window)
 			//draw home pheromone
 
 			float HP = m_homePheromone[gridpos(i,j)];
-			m_homePheromoneColour.a = HP/4;
-			if (HP > 1)
+
+			HP -=500;
+
+			HP /= 2;
+
+			m_homePheromoneColour.a = HP;
+			if (HP > 0)
 			{
 				m_cellShape.setFillColor(m_homePheromoneColour);
 
@@ -107,17 +115,20 @@ void Grid::draw(sf::RenderWindow& window)
 void Grid::addHomePheromone(int x, int y, float amount)
 {
 
-	if (x / m_cellSize <= m_width && y / m_cellSize <= m_height)
+	if (gridpos(x / m_cellSize, y / m_cellSize) <= m_homePheromone.size())
 	{
 		m_homePheromone[gridpos(x / m_cellSize, y / m_cellSize)] += amount;
+
+		if (m_homePheromone[gridpos(x / m_cellSize, y / m_cellSize)] > 1000)
+		{
+			m_homePheromone[gridpos(x / m_cellSize, y / m_cellSize)] = 1000;
+		}
+
 	}
 
 	
 
-		if (m_homePheromone[gridpos(x / m_cellSize, y / m_cellSize)] > 255)
-		{
-			m_homePheromone[gridpos(x / m_cellSize, y / m_cellSize)] = 255;
-		}
+		
 }
 
 void Grid::addFood(int x, int y, float amount)
@@ -134,6 +145,40 @@ void Grid::addWalls(int x, int y)
 int Grid::gridpos(int x, int y)
 {
 	return x + (y * m_width);
+
+}
+
+void Grid::diffusePheromones(float rate)
+{
+
+	std::vector<float> newHomePheromomne = m_homePheromone;
+
+	for (int x = 0; x < m_width; x++)
+	{
+		for (int y = 0; y < m_height; y++)
+		{
+
+			float totalLevel = m_homePheromone[gridpos(x, y)];
+			for (int dx = -1; dx <= 1; dx++) {
+				for (int dy = -1; dy <= 1; dy++) {
+					if (dx == 0 && dy == 0) continue;
+					int nx = x + dx;
+					int ny = y + dy;
+					if (nx < 0 || nx >= m_width || ny < 0 || ny >= m_height) continue;
+					totalLevel += m_homePheromone[gridpos(nx,ny)];
+				}
+			}
+
+			newHomePheromomne[gridpos(x, y)] = (1 - rate) * newHomePheromomne[gridpos(x, y)] + rate * (totalLevel / 9.0f);
+
+
+		}
+
+	}
+
+	m_homePheromone = newHomePheromomne;
+
+
 
 }
 
