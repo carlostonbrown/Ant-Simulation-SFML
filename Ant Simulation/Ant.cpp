@@ -64,8 +64,6 @@ void Ant::update(sf::Time deltaTime,Grid& grid,int width, int height)
 
     if (m_pheromoneAmount > 0)
     {
-
-        
         layPheramones(grid, deltaTime);
     }
 

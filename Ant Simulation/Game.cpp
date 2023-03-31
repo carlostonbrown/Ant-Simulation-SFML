@@ -6,9 +6,9 @@ const sf::Time Game::TimePerFrame = sf::seconds(1.f / 144.f);
 Game::Game()
     : window(sf::VideoMode(width, height), "Ant Simulation"),
     m_colony(sf::Vector2f(width / 2, height / 2), 200, sf::Color::Red),
-    m_grid(width, height, 7, sf::Color::Blue, sf::Color::Green)
+    m_grid(width, height, 5, sf::Color::Blue, sf::Color::Green)
 {
-
+    
 
     
 
@@ -28,7 +28,9 @@ void Game::Run()
         {
             timeSinceLastUpdate -= TimePerFrame;
             processEvents();
-            update(TimePerFrame*m_simSpeed);
+
+            if(running)update(TimePerFrame*m_simSpeed);
+            
         }
         
         render();
@@ -51,7 +53,12 @@ void Game::processEvents()
             }
             else if (event.mouseButton.button == sf::Mouse::Right)
             {
-                m_grid.addWalls(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y);
+                m_grid.addWalls(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y,1);
+            }
+            else if (event.mouseButton.button == sf::Mouse::Middle)
+            {
+                m_grid.addFood(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y, 0);
+                m_grid.addWalls(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y,0);
             }
         case sf::Event::MouseMoved:
 
@@ -62,7 +69,12 @@ void Game::processEvents()
             }
             else if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
             {
-                m_grid.addWalls(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y);
+                m_grid.addWalls(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y,1);
+            }
+            else if (sf::Mouse::isButtonPressed(sf::Mouse::Middle))
+            {
+                m_grid.addFood(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y, 0);
+                m_grid.addWalls(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y, 0);
             }
 
         case sf::Event::KeyPressed:
@@ -114,5 +126,17 @@ void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed)
     if (key == sf::Keyboard::Comma)
     {
         m_simSpeed--;
+    }
+    if (key == sf::Keyboard::Space)
+    {
+        running = true;
+    }
+    if (key == sf::Keyboard::S)
+    {
+        m_grid.saveToFile("grid.bin");
+    }
+    if (key == sf::Keyboard::L)
+    {
+        m_grid.loadFromFile("grid.bin");
     }
 }

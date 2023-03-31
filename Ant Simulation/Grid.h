@@ -11,8 +11,11 @@ public:
 	void draw(sf::RenderWindow& window);
 	void addHomePheromone(int x,int y, float amount);
 	void addFood(int x, int y, float amount);
-	void addWalls(int x, int y);
+	void addWalls(int x, int y,float amount);
+	bool saveToFile(const std::string& filename) const;
+	bool loadFromFile(const std::string& filename);
 	int windowToGridPos(int x, int y);
+	bool hasfood(int x, int y);
 private:
 
 	float decay = 1;

@@ -1,4 +1,6 @@
 #include "Grid.h"
+#include <fstream>
+#include <iostream>
 
 Grid::Grid(int width, int height, int cellSize, sf::Color homePheromoneColour, sf::Color foodPheromoneColour) :
 	m_width(width / cellSize), 
@@ -133,13 +135,87 @@ void Grid::addHomePheromone(int x, int y, float amount)
 
 void Grid::addFood(int x, int y, float amount)
 {
-	m_foodAmount[gridpos(x / m_cellSize, y / m_cellSize)] += amount;
+
+	for (int dx = -1; dx <= 1; dx++) {
+		for (int dy = -1; dy <= 1; dy++) {
+			
+			int nx = x/m_cellSize + dx;
+			int ny = y/m_cellSize + dy;
+			m_foodAmount[gridpos(nx, ny)] = amount;
+			if (nx < 0 || nx >= m_width || ny < 0 || ny >= m_height) continue;
+			
+		}
+	}
+
+	
 }
 
-void Grid::addWalls(int x, int y)
+void Grid::addWalls(int x, int y,float amount)
 {
 
-	m_walls[gridpos(x / m_cellSize, y / m_cellSize)] = true;
+	for (int dx = -1; dx <= 1; dx++) {
+		for (int dy = -1; dy <= 1; dy++) {
+
+			int nx = x / m_cellSize + dx;
+			int ny = y / m_cellSize + dy;
+			m_walls[gridpos(nx, ny)] = amount;
+			if (nx < 0 || nx >= m_width || ny < 0 || ny >= m_height) continue;
+
+		}
+	}
+}
+
+
+
+bool Grid::saveToFile(const std::string& filename) const
+{
+
+	
+	std::ofstream file(filename, std::ios::out | std::ios::binary);
+	if (!file.is_open()) {
+		std::cerr << "Failed to open file " << filename << " for writing\n";
+		return false;
+	}
+
+	// Write dimensions
+	file.write(reinterpret_cast<const char*>(&m_width), sizeof(m_width));
+	file.write(reinterpret_cast<const char*>(&m_height), sizeof(m_height));
+
+	// Write data
+	file.write(reinterpret_cast<const char*>(m_foodAmount.data()), m_foodAmount.size() * sizeof(float));
+	file.write(reinterpret_cast<const char*>(m_walls.data()), m_walls.size() * sizeof(float));
+
+
+
+	return true;
+
+}
+
+bool Grid::loadFromFile(const std::string& filename)
+{
+	std::ifstream file(filename, std::ios::in | std::ios::binary);
+	if (!file.is_open()) {
+		std::cerr << "Failed to open file " << filename << " for reading\n";
+		return false;
+	}
+
+	// Read dimensions
+	int width, height;
+	file.read(reinterpret_cast<char*>(&width), sizeof(width));
+	file.read(reinterpret_cast<char*>(&height), sizeof(height));
+
+	// Check dimensions match
+	if (width != m_width || height != m_height) {
+		std::cerr << "Cannot load grid from " << filename << " because dimensions do not match\n";
+		return false;
+	}
+
+	// Read data
+	file.read(reinterpret_cast<char*>(m_foodAmount.data()), m_foodAmount.size() * sizeof(float));
+	file.read(reinterpret_cast<char*>(m_walls.data()), m_walls.size() * sizeof(float));
+
+
+	return true;
 }
 
 int Grid::gridpos(int x, int y)
@@ -157,6 +233,8 @@ void Grid::diffusePheromones(float rate)
 	{
 		for (int y = 0; y < m_height; y++)
 		{
+			if (m_walls[gridpos(x, y)]) continue;
+
 
 			float totalLevel = m_homePheromone[gridpos(x, y)];
 			for (int dx = -1; dx <= 1; dx++) {
@@ -185,4 +263,15 @@ void Grid::diffusePheromones(float rate)
 int Grid::windowToGridPos(int x, int y)
 {
 	return (x / m_cellSize) + (y / m_cellSize) * m_width;
+}
+
+bool Grid::hasfood(int x, int y)
+{
+
+	if (m_foodAmount[gridpos(x / m_cellSize, y / m_cellSize)] > 0)
+	{
+		return true;
+	}
+
+	return false;
 }

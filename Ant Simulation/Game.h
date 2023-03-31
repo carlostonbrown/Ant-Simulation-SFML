@@ -12,8 +12,9 @@ private:
     int width = 1000;
     int height = 1000;
     float m_simSpeed = 1;
+    bool running = false;
     sf::RenderWindow window;
-
+    sf::CircleShape m_cursorShape;
     static const sf::Time TimePerFrame;
 
     AntColony m_colony;
