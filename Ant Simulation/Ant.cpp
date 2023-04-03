@@ -24,19 +24,53 @@ void Ant::update(sf::Time deltaTime,Grid& grid,int width, int height)
 
     if (m_hasFood)
     {
-        //follow home pheramones
+        // Follow home pheromones
+        sf::Vector2f direction = grid.getHomePheromoneDirection(m_position.x, m_position.y);
+        if (direction != sf::Vector2f(0, 0)) 
+        {
+            // Turn towards the direction of the pheromone
+            sf::Vector2f newVelocity = m_velocity + direction * m_turnSpeed;
+            float length = std::sqrt(newVelocity.x * newVelocity.x + newVelocity.y * newVelocity.y);
+            m_velocity = newVelocity / length;
+        }
+
+
+
     }
     else
     {
         //follow food pheramones
+        if (m_pheromoneAmount > 0)
+        {
+            
+        }
+
+        if (grid.hasfood(m_position.x, m_position.y))
+        {
+            m_hasFood = true;
+        }
     }
+
 
     wander();
 
 
-    m_position += m_velocity * deltaTime.asSeconds() * m_speed;
+   
+
+    if (grid.isWalls(m_position.x, m_position.y))
+    {
+
+        // Reflect velocity off wall
+        sf::Vector2f normal = grid.getCellNormal(m_position.x, m_position.y);
+        m_velocity = m_velocity - 2.0f * normal * (normal.x * m_velocity.x + normal.y * m_velocity.y);
+
+        while (grid.isWalls(m_position.x, m_position.y))
+        {
+            m_position += normal * deltaTime.asSeconds();
+        }
 
 
+    }
 
     if (m_position.x <= 10)
     {
@@ -59,13 +93,13 @@ void Ant::update(sf::Time deltaTime,Grid& grid,int width, int height)
         m_velocity.y = -m_velocity.y;
     }
 
+
+
+    m_position += m_velocity * deltaTime.asSeconds() * m_speed;
     m_shape.setPosition(m_position);
    
-
-    if (m_pheromoneAmount > 0)
-    {
-        layPheramones(grid, deltaTime);
-    }
+    layPheramones(grid, deltaTime);
+    
 
     
     
@@ -80,9 +114,16 @@ void Ant::draw(sf::RenderWindow& window)
 
 void Ant::layPheramones(Grid& grid,sf::Time deltaTime)
 {
-
-    grid.addHomePheromone(m_position.x, m_position.y, m_pheromoneAmount * deltaTime.asSeconds());
-    m_pheromoneAmount-= decay*deltaTime.asSeconds();
+    if (m_hasFood)
+    {
+        // lay food pheromone 
+    }
+    else
+    {
+        grid.addHomePheromone(m_position.x, m_position.y, m_pheromoneAmount * deltaTime.asSeconds());
+        m_pheromoneAmount -= decay * deltaTime.asSeconds();
+    }
+    
 
 }
 
@@ -98,3 +139,6 @@ void Ant::wander()
     length = std::sqrt(m_velocity.x * m_velocity.x + m_velocity.y * m_velocity.y);
     m_velocity /= length;
 }
+
+
+

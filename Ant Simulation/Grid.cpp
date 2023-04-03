@@ -34,7 +34,7 @@ Grid::Grid(int width, int height, int cellSize, sf::Color homePheromoneColour, s
 
 void Grid::update(sf::Time dt)
 {
-	diffusePheromones(0.01);
+	diffusePheromones(0.1);
 
 	for (float& cell : m_homePheromone)
 	{
@@ -65,7 +65,7 @@ void Grid::draw(sf::RenderWindow& window)
 
 			float HP = m_homePheromone[gridpos(i,j)];
 
-			HP -=500;
+		    HP -=500;
 
 			HP /= 2;
 
@@ -267,11 +267,108 @@ int Grid::windowToGridPos(int x, int y)
 
 bool Grid::hasfood(int x, int y)
 {
-
-	if (m_foodAmount[gridpos(x / m_cellSize, y / m_cellSize)] > 0)
+	if (gridpos(x / m_cellSize, y / m_cellSize) <= m_homePheromone.size())
 	{
-		return true;
+		if (m_foodAmount[gridpos(x / m_cellSize, y / m_cellSize)] > 0)
+		{
+			return true;
+		}
 	}
+	
 
 	return false;
+}
+
+bool Grid::isWalls(int x, int y)
+{
+
+	if (gridpos(x / m_cellSize, y / m_cellSize) <= m_homePheromone.size())
+	{
+		if (m_walls[gridpos(x / m_cellSize, y / m_cellSize)] > 0)
+		{
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+sf::Vector2f Grid::getHomePheromoneDirection(int x, int y)
+{
+	int X = x / m_cellSize;
+	int Y = y / m_cellSize;
+
+	sf::Vector2f direction(0.f, 0.f);
+
+	float maxIntensity = 0.f;
+
+	// Check the intensity of the home pheromones in the cells around the ant
+	for (int i = -1; i <= 1; i++)
+	{
+		for (int j = -1; j <= 1; j++)
+		{
+			if (X + i >= 0 && X + i < m_width &&
+				Y + j >= 0 && Y + j < m_height)
+			{
+				float intensity = m_homePheromone[gridpos(X+i,Y+j)];
+				if (intensity > maxIntensity)
+				{
+					direction = sf::Vector2f(static_cast<float>(i), static_cast<float>(j));
+					maxIntensity = intensity;
+				}
+			}
+		}
+	}
+
+	// Normalize the direction vector
+	float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+	if (length > 0.f)
+	{
+		direction /= length;
+	}
+
+	return direction;
+
+}
+
+sf::Vector2f Grid::getCellNormal(int x, int y)
+{
+	sf::Vector2f normal(0.f, 0.f);
+
+	if (isWalls(x,y) )
+	{
+		// Calculate the normal based on the neighboring cells
+		if (isWalls(x - 1, y)) {
+			normal += sf::Vector2f(1.f, 0.f);
+		}
+		if (isWalls(x + 1, y) ) {
+			normal += sf::Vector2f(-1.f, 0.f);
+		}
+		if (isWalls(x, y - 1) ) {
+			normal += sf::Vector2f(0.f, 1.f);
+		}
+		if (isWalls(x, y + 1) ) {
+			normal += sf::Vector2f(0.f, -1.f);
+		}
+		if (isWalls(x - 1, y-1)) {
+			normal += sf::Vector2f(1.f, 1.f);
+		}
+		if (isWalls(x + 1, y+1)) {
+			normal += sf::Vector2f(-1.f, -1.f);
+		}
+		if (isWalls(x+1, y - 1)) {
+			normal += sf::Vector2f(-1.f, 1.f);
+		}
+		if (isWalls(x-1, y + 1)) {
+			normal += sf::Vector2f(1.f, -1.f);
+		}
+
+		// Normalize the resulting vector
+		float length = std::sqrt(normal.x * normal.x + normal.y * normal.y);
+		if (length != 0.f) {
+			normal /= length;
+		}
+	}
+
+	return normal;
 }

@@ -18,7 +18,7 @@ private:
     sf::Vector2f m_position;
     sf::Vector2f m_velocity;
     float m_pheromoneAmount;
-    float decay =10;
+    float decay =100;
     float m_speed;
     float m_turnSpeed = 0.1;
     bool m_hasFood;

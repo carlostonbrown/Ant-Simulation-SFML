@@ -5,8 +5,8 @@ const sf::Time Game::TimePerFrame = sf::seconds(1.f / 144.f);
 
 Game::Game()
     : window(sf::VideoMode(width, height), "Ant Simulation"),
-    m_colony(sf::Vector2f(width / 2, height / 2), 200, sf::Color::Red),
-    m_grid(width, height, 5, sf::Color::Blue, sf::Color::Green)
+    m_colony(sf::Vector2f(width / 2, height / 2), 2000, sf::Color::Red),
+    m_grid(width, height, 7, sf::Color::Blue, sf::Color::Green)
 {
     
 
@@ -112,12 +112,7 @@ void Game::render()
 
 void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed)
 {
-    // TODO: Key events for your game
-    // Example:
-    // if (key == sf::Keyboard::W)
-    // {
-    // mIsMovingUp = isPressed;
-    // }
+
 
     if (key == sf::Keyboard::Period)
     {

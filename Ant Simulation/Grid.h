@@ -16,9 +16,12 @@ public:
 	bool loadFromFile(const std::string& filename);
 	int windowToGridPos(int x, int y);
 	bool hasfood(int x, int y);
+	bool isWalls(int x, int y);
+	sf::Vector2f getHomePheromoneDirection(int x, int y);
+	sf::Vector2f getCellNormal(int x, int y);
 private:
 
-	float decay = 1;
+	float decay = 0.5;
 	int m_width;
 	int m_height;
 	int m_cellSize;
@@ -34,5 +37,7 @@ private:
 	int gridpos(int x, int y);
 	void diffusePheromones(float rate);
 
+
+	
 
 };
