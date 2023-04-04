@@ -34,7 +34,7 @@ Grid::Grid(int width, int height, int cellSize, sf::Color homePheromoneColour, s
 
 void Grid::update(sf::Time dt)
 {
-	diffusePheromones(0.1);
+	diffusePheromones(0.01,0.01);
 
 	for (float& cell : m_homePheromone)
 	{
@@ -44,7 +44,24 @@ void Grid::update(sf::Time dt)
 		}
 		
 	}
+	for (float& cell : m_foodPheromone)
+	{
+		if (cell > 0)
+		{
+			cell -= decay * dt.asSeconds();
+		}
 
+	}
+
+	for (int i = 0; i < m_foodAmount.size();i++)
+	{
+
+		if (m_foodAmount[i] > 0)
+		{
+			m_foodPheromone[i] = 1000;
+		}
+
+	}
 	
 
 
@@ -65,9 +82,9 @@ void Grid::draw(sf::RenderWindow& window)
 
 			float HP = m_homePheromone[gridpos(i,j)];
 
-		    HP -=500;
+		   // HP -=500;
 
-			HP /= 2;
+			HP /= 4;
 
 			m_homePheromoneColour.a = HP;
 			if (HP > 0)
@@ -80,6 +97,21 @@ void Grid::draw(sf::RenderWindow& window)
 			
 			
 			//draw food pheromone
+
+			float FP = m_foodPheromone[gridpos(i, j)];
+
+			//FP -= 500;
+
+			FP /= 4;
+
+			m_foodPheromoneColour.a = FP;
+			if (FP > 0)
+			{
+				m_cellShape.setFillColor(m_foodPheromoneColour);
+
+				m_cellShape.setPosition(x, y);
+				window.draw(m_cellShape);
+			}
 
 
 
@@ -131,6 +163,25 @@ void Grid::addHomePheromone(int x, int y, float amount)
 	
 
 		
+}
+
+void Grid::addFoodPheromone(int x, int y, float amount)
+{
+
+	if (gridpos(x / m_cellSize, y / m_cellSize) <= m_foodPheromone.size())
+	{
+		m_foodPheromone[gridpos(x / m_cellSize, y / m_cellSize)] += amount;
+
+		if (m_foodPheromone[gridpos(x / m_cellSize, y / m_cellSize)] > 1000)
+		{
+			m_foodPheromone[gridpos(x / m_cellSize, y / m_cellSize)] = 1000;
+		}
+
+	}
+
+
+
+
 }
 
 void Grid::addFood(int x, int y, float amount)
@@ -224,30 +275,36 @@ int Grid::gridpos(int x, int y)
 
 }
 
-void Grid::diffusePheromones(float rate)
+void Grid::diffusePheromones(float homeRate, float foodRate)
 {
 
 	std::vector<float> newHomePheromomne = m_homePheromone;
+	std::vector<float> newFoodPheromomne = m_foodPheromone;
 
 	for (int x = 0; x < m_width; x++)
 	{
 		for (int y = 0; y < m_height; y++)
 		{
 			if (m_walls[gridpos(x, y)]) continue;
+			if (m_foodAmount[gridpos(x, y)]) continue;
 
-
-			float totalLevel = m_homePheromone[gridpos(x, y)];
+			float totalHomeLevel = m_homePheromone[gridpos(x, y)];
+			float totalFoodLevel = m_foodPheromone[gridpos(x, y)];
 			for (int dx = -1; dx <= 1; dx++) {
 				for (int dy = -1; dy <= 1; dy++) {
 					if (dx == 0 && dy == 0) continue;
 					int nx = x + dx;
 					int ny = y + dy;
 					if (nx < 0 || nx >= m_width || ny < 0 || ny >= m_height) continue;
-					totalLevel += m_homePheromone[gridpos(nx,ny)];
+					if (m_foodAmount[gridpos(nx, ny)]) continue;
+
+					totalHomeLevel += m_homePheromone[gridpos(nx,ny)];
+					totalFoodLevel += m_foodPheromone[gridpos(nx, ny)];
 				}
 			}
 
-			newHomePheromomne[gridpos(x, y)] = (1 - rate) * newHomePheromomne[gridpos(x, y)] + rate * (totalLevel / 9.0f);
+			newHomePheromomne[gridpos(x, y)] = (1 - homeRate) * newHomePheromomne[gridpos(x, y)] + homeRate * (totalHomeLevel / 9.0f);
+			newFoodPheromomne[gridpos(x, y)] = (1 - foodRate) * newFoodPheromomne[gridpos(x, y)] + foodRate * (totalFoodLevel / 9.0f);
 
 
 		}
@@ -255,7 +312,7 @@ void Grid::diffusePheromones(float rate)
 	}
 
 	m_homePheromone = newHomePheromomne;
-
+	m_foodPheromone = newFoodPheromomne;
 
 
 }
@@ -329,6 +386,43 @@ sf::Vector2f Grid::getHomePheromoneDirection(int x, int y)
 
 	return direction;
 
+}
+
+sf::Vector2f Grid::getFoodPheromoneDirection(int x, int y)
+{
+	int X = x / m_cellSize;
+	int Y = y / m_cellSize;
+
+	sf::Vector2f direction(0.f, 0.f);
+
+	float maxIntensity = 0.f;
+
+	// Check the intensity of the home pheromones in the cells around the ant
+	for (int i = -1; i <= 1; i++)
+	{
+		for (int j = -1; j <= 1; j++)
+		{
+			if (X + i >= 0 && X + i < m_width &&
+				Y + j >= 0 && Y + j < m_height)
+			{
+				float intensity = m_foodPheromone[gridpos(X + i, Y + j)];
+				if (intensity > maxIntensity)
+				{
+					direction = sf::Vector2f(static_cast<float>(i), static_cast<float>(j));
+					maxIntensity = intensity;
+				}
+			}
+		}
+	}
+
+	// Normalize the direction vector
+	float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+	if (length > 0.f)
+	{
+		direction /= length;
+	}
+
+	return direction;
 }
 
 sf::Vector2f Grid::getCellNormal(int x, int y)

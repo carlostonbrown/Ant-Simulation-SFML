@@ -3,6 +3,7 @@
 Ant::Ant(sf::Vector2f position, sf::Vector2f velocity, sf::Color color) :
     m_shape(3.f),
     m_position(position),
+    m_colonyPosition(position),
     m_velocity(velocity),
     m_hasFood(false),
     m_speed(100),
@@ -33,21 +34,34 @@ void Ant::update(sf::Time deltaTime,Grid& grid,int width, int height)
             float length = std::sqrt(newVelocity.x * newVelocity.x + newVelocity.y * newVelocity.y);
             m_velocity = newVelocity / length;
         }
-
+        sf::Vector2f vectorToColony = m_position - m_colonyPosition;
+        float distanceToColony = std::sqrt(vectorToColony.x * vectorToColony.x + vectorToColony.y * vectorToColony.y);
+        if (distanceToColony < 10)
+        {
+            m_velocity *= -1.0f;
+            m_hasFood = false;
+            m_pheromoneAmount = 1000;
+        }
 
 
     }
     else
     {
         //follow food pheramones
-        if (m_pheromoneAmount > 0)
+        sf::Vector2f direction = grid.getFoodPheromoneDirection(m_position.x, m_position.y);
+        if (direction != sf::Vector2f(0, 0))
         {
-            
+            // Turn towards the direction of the pheromone
+            sf::Vector2f newVelocity = m_velocity + direction * m_turnSpeed;
+            float length = std::sqrt(newVelocity.x * newVelocity.x + newVelocity.y * newVelocity.y);
+            m_velocity = newVelocity / length;
         }
 
         if (grid.hasfood(m_position.x, m_position.y))
         {
+            m_velocity *= -1.0f;
             m_hasFood = true;
+            m_pheromoneAmount = 100;
         }
     }
 
@@ -98,7 +112,12 @@ void Ant::update(sf::Time deltaTime,Grid& grid,int width, int height)
     m_position += m_velocity * deltaTime.asSeconds() * m_speed;
     m_shape.setPosition(m_position);
    
-    layPheramones(grid, deltaTime);
+
+    if (m_pheromoneAmount > 0)
+    {
+        layPheramones(grid, deltaTime);
+    }
+   
     
 
     
@@ -117,6 +136,9 @@ void Ant::layPheramones(Grid& grid,sf::Time deltaTime)
     if (m_hasFood)
     {
         // lay food pheromone 
+        grid.addFoodPheromone(m_position.x, m_position.y, m_pheromoneAmount * deltaTime.asSeconds());
+        m_pheromoneAmount -= decay * deltaTime.asSeconds();
+
     }
     else
     {

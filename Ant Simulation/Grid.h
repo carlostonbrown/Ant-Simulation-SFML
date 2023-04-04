@@ -10,6 +10,7 @@ public:
 	void update(sf::Time dt);
 	void draw(sf::RenderWindow& window);
 	void addHomePheromone(int x,int y, float amount);
+	void addFoodPheromone(int x, int y, float amount);
 	void addFood(int x, int y, float amount);
 	void addWalls(int x, int y,float amount);
 	bool saveToFile(const std::string& filename) const;
@@ -18,10 +19,11 @@ public:
 	bool hasfood(int x, int y);
 	bool isWalls(int x, int y);
 	sf::Vector2f getHomePheromoneDirection(int x, int y);
+	sf::Vector2f getFoodPheromoneDirection(int x, int y);
 	sf::Vector2f getCellNormal(int x, int y);
 private:
 
-	float decay = 0.5;
+	float decay = 1;
 	int m_width;
 	int m_height;
 	int m_cellSize;
@@ -35,7 +37,7 @@ private:
 	std::vector<float> m_walls;
 
 	int gridpos(int x, int y);
-	void diffusePheromones(float rate);
+	void diffusePheromones(float homeRate,float foodRate);
 
 
 	

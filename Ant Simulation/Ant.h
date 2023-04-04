@@ -16,9 +16,10 @@ private:
     void wander();
     sf::CircleShape m_shape;
     sf::Vector2f m_position;
+    sf::Vector2f m_colonyPosition;
     sf::Vector2f m_velocity;
     float m_pheromoneAmount;
-    float decay =100;
+    float decay = 100;
     float m_speed;
     float m_turnSpeed = 0.1;
     bool m_hasFood;
