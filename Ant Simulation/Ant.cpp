@@ -20,13 +20,15 @@ Ant::Ant(sf::Vector2f position, sf::Vector2f velocity, sf::Color color) :
 void Ant::update(sf::Time deltaTime,Grid& grid,int width, int height)
 {
 
-
+    
     //follow pheramones 
 
     if (m_hasFood)
     {
         // Follow home pheromones
-        sf::Vector2f direction = grid.getHomePheromoneDirection(m_position.x, m_position.y);
+        //sf::Vector2f direction = grid.getHomePheromoneDirection(m_position.x, m_position.y);
+        sf::Vector2f direction = grid.getHomePheromoneDirectionFO(m_position.x, m_position.y,m_velocity, angleRadians );
+
         if (direction != sf::Vector2f(0, 0)) 
         {
             // Turn towards the direction of the pheromone
@@ -36,7 +38,7 @@ void Ant::update(sf::Time deltaTime,Grid& grid,int width, int height)
         }
         sf::Vector2f vectorToColony = m_position - m_colonyPosition;
         float distanceToColony = std::sqrt(vectorToColony.x * vectorToColony.x + vectorToColony.y * vectorToColony.y);
-        if (distanceToColony < 10)
+        if (distanceToColony < 20)
         {
             m_velocity *= -1.0f;
             m_hasFood = false;
@@ -48,7 +50,8 @@ void Ant::update(sf::Time deltaTime,Grid& grid,int width, int height)
     else
     {
         //follow food pheramones
-        sf::Vector2f direction = grid.getFoodPheromoneDirection(m_position.x, m_position.y);
+        //sf::Vector2f direction = grid.getFoodPheromoneDirection(m_position.x, m_position.y);
+        sf::Vector2f direction = grid.getFoodPheromoneDirectionFO(m_position.x, m_position.y, m_velocity, angleRadians);
         if (direction != sf::Vector2f(0, 0))
         {
             // Turn towards the direction of the pheromone
@@ -61,7 +64,8 @@ void Ant::update(sf::Time deltaTime,Grid& grid,int width, int height)
         {
             m_velocity *= -1.0f;
             m_hasFood = true;
-            m_pheromoneAmount = 100;
+            m_pheromoneAmount = 1000;
+            grid.removeFood(m_position.x, m_position.y, 1);
         }
     }
 
@@ -69,22 +73,37 @@ void Ant::update(sf::Time deltaTime,Grid& grid,int width, int height)
     wander();
 
 
-   
+    float movementStep = m_speed * deltaTime.asSeconds();
+    int steps = static_cast<int>(std::ceil(movementStep / grid.getCellSize()));
 
-    if (grid.isWalls(m_position.x, m_position.y))
+    // Calculate the distance the ant will travel in each step
+    sf::Vector2f stepDirection = m_velocity * deltaTime.asSeconds() / (float)steps;
+
+    // Move the ant in smaller steps and check for collisions at each step
+    for (int i = 0; i < steps; i++)
     {
-
-        // Reflect velocity off wall
-        sf::Vector2f normal = grid.getCellNormal(m_position.x, m_position.y);
-        m_velocity = m_velocity - 2.0f * normal * (normal.x * m_velocity.x + normal.y * m_velocity.y);
-
-        while (grid.isWalls(m_position.x, m_position.y))
+        sf::Vector2f newPosition = m_position + stepDirection;
+        if (!grid.isWalls(newPosition.x, newPosition.y)) // Add a function in Grid class to check if a wall exists at the given position
         {
-            m_position += normal * deltaTime.asSeconds();
+            m_position = newPosition;
         }
-
-
+        else
+        {
+            
+            m_velocity = -m_velocity;
+            newPosition = m_position + stepDirection * (float)(steps - i - 1); // Update the newPosition with the remaining movement steps
+            if (!grid.isWalls(newPosition.x, newPosition.y))
+            {
+                m_position = newPosition;
+            }
+            break; // Break the loop to stop moving after a collision
+        }
     }
+
+
+
+
+    
 
     if (m_position.x <= 10)
     {
@@ -107,7 +126,12 @@ void Ant::update(sf::Time deltaTime,Grid& grid,int width, int height)
         m_velocity.y = -m_velocity.y;
     }
 
-
+    // If the ant is still within a wall, move it to the nearest empty cell
+    if (grid.isWalls(m_position.x, m_position.y))
+    {
+        sf::Vector2i emptyCell = grid.findNearestEmptyCell(m_position.x, m_position.y);
+        m_position = sf::Vector2f(static_cast<float>(emptyCell.x), static_cast<float>(emptyCell.y));
+    }
 
     m_position += m_velocity * deltaTime.asSeconds() * m_speed;
     m_shape.setPosition(m_position);
@@ -127,6 +151,23 @@ void Ant::update(sf::Time deltaTime,Grid& grid,int width, int height)
 void Ant::draw(sf::RenderWindow& window)
 {
     window.draw(m_shape);
+
+
+
+    if (m_hasFood)
+    {
+        sf::Color color = m_shape.getFillColor();
+        float radius = m_shape.getRadius();
+        m_shape.setFillColor(sf::Color::Green);
+        m_shape.setRadius(2);
+        m_shape.setOrigin(m_shape.getRadius(), m_shape.getRadius());
+        m_shape.setPosition(m_position);
+        window.draw(m_shape);
+        m_shape.setFillColor(color);
+        m_shape.setRadius(radius);
+        m_shape.setOrigin(m_shape.getRadius(), m_shape.getRadius());
+        m_shape.setPosition(m_position);
+    }
 }
 
 

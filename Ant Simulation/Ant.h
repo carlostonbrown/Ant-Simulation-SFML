@@ -22,6 +22,9 @@ private:
     float decay = 100;
     float m_speed;
     float m_turnSpeed = 0.1;
+    float m_pheromoneAngle = 60;
+    float angleRadians = m_pheromoneAngle / 57.2957795;
+    float m_wanderProbability = 0.05f;
     bool m_hasFood;
 };
 

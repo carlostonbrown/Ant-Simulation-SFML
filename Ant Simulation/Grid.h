@@ -13,6 +13,7 @@ public:
 	void addFoodPheromone(int x, int y, float amount);
 	void addFood(int x, int y, float amount);
 	void addWalls(int x, int y,float amount);
+	void removeFood(int x, int y, float amount);
 	bool saveToFile(const std::string& filename) const;
 	bool loadFromFile(const std::string& filename);
 	int windowToGridPos(int x, int y);
@@ -20,10 +21,16 @@ public:
 	bool isWalls(int x, int y);
 	sf::Vector2f getHomePheromoneDirection(int x, int y);
 	sf::Vector2f getFoodPheromoneDirection(int x, int y);
+	sf::Vector2f getHomePheromoneDirectionFO(int x, int y, sf::Vector2f velocity, float angle);
+	sf::Vector2f getFoodPheromoneDirectionFO(int x, int y, sf::Vector2f velocity, float angle);
 	sf::Vector2f getCellNormal(int x, int y);
+	sf::Vector2i findNearestEmptyCell(int x, int y);
+	float getCellSize();
+
 private:
 
-	float decay = 1;
+	float foodDecay = 0.90f;
+	float homeDecay = 0.90f;
 	int m_width;
 	int m_height;
 	int m_cellSize;
@@ -37,7 +44,7 @@ private:
 	std::vector<float> m_walls;
 
 	int gridpos(int x, int y);
-	void diffusePheromones(float homeRate,float foodRate);
+	void diffusePheromones(float homeRate,float foodRate, float homeThreshold, float foodThreshold);
 
 
 	
