@@ -11,7 +11,7 @@ public:
 
     void update(sf::Time deltaTime,Grid& grid, int width, int height);
     void draw(sf::RenderWindow& window);
-
+    void spawnAnt();
 private:
     sf::Color m_color;
     sf::CircleShape m_shape;
@@ -19,7 +19,7 @@ private:
     std::vector<Ant> m_ants;
 
 
-    void spawnAnt();
+    
 
 
 

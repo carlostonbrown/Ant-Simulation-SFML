@@ -9,7 +9,7 @@ Game::Game()
     m_colony(sf::Vector2f(width / 2, height / 2), 500, sf::Color::Red),
     m_grid(width, height, 10, sf::Color::Blue, sf::Color::Cyan)
 {
-    
+    //m_grid.generateMap(0.4, -0.01, 3);
 
     
 

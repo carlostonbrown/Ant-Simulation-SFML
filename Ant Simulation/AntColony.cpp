@@ -39,7 +39,7 @@ void AntColony::update(sf::Time deltaTime, Grid& grid, int width, int height)
         ant.update(deltaTime,grid,width,height);
     }
     
-    grid.addHomePheromone(m_position.x, m_position.y, 100);
+    grid.addHomePheromone(m_position.x, m_position.y, 10000);
 
 }
 void AntColony::draw(sf::RenderWindow& window)

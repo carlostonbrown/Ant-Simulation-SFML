@@ -3,6 +3,7 @@
 Ant::Ant(sf::Vector2f position, sf::Vector2f velocity, sf::Color color) :
     m_shape(3.f),
     m_position(position),
+    m_prevposition(position),
     m_colonyPosition(position),
     m_velocity(velocity),
     m_hasFood(false),
@@ -19,59 +20,80 @@ Ant::Ant(sf::Vector2f position, sf::Vector2f velocity, sf::Color color) :
 
 void Ant::update(sf::Time deltaTime,Grid& grid,int width, int height)
 {
-
-    
-    //follow pheramones 
-
-    if (m_hasFood)
+    float randomChance = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+    if (randomChance < m_wanderProbability)
     {
-        // Follow home pheromones
-        //sf::Vector2f direction = grid.getHomePheromoneDirection(m_position.x, m_position.y);
-        sf::Vector2f direction = grid.getHomePheromoneDirectionFO(m_position.x, m_position.y,m_velocity, angleRadians );
-
-        if (direction != sf::Vector2f(0, 0)) 
-        {
-            // Turn towards the direction of the pheromone
-            sf::Vector2f newVelocity = m_velocity + direction * m_turnSpeed;
-            float length = std::sqrt(newVelocity.x * newVelocity.x + newVelocity.y * newVelocity.y);
-            m_velocity = newVelocity / length;
-        }
-        sf::Vector2f vectorToColony = m_position - m_colonyPosition;
-        float distanceToColony = std::sqrt(vectorToColony.x * vectorToColony.x + vectorToColony.y * vectorToColony.y);
-        if (distanceToColony < 20)
-        {
-            m_velocity *= -1.0f;
-            m_hasFood = false;
-            m_pheromoneAmount = 1000;
-        }
-
+        wander();
 
     }
     else
     {
-        //follow food pheramones
-        //sf::Vector2f direction = grid.getFoodPheromoneDirection(m_position.x, m_position.y);
-        sf::Vector2f direction = grid.getFoodPheromoneDirectionFO(m_position.x, m_position.y, m_velocity, angleRadians);
-        if (direction != sf::Vector2f(0, 0))
+
+
+
+        //follow pheramones 
+
+        if (m_hasFood)
         {
-            // Turn towards the direction of the pheromone
-            sf::Vector2f newVelocity = m_velocity + direction * m_turnSpeed;
-            float length = std::sqrt(newVelocity.x * newVelocity.x + newVelocity.y * newVelocity.y);
-            m_velocity = newVelocity / length;
+            // Follow home pheromones
+            //sf::Vector2f direction = grid.getHomePheromoneDirection(m_position.x, m_position.y);
+            sf::Vector2f direction = grid.getHomePheromoneDirectionFO(m_position.x, m_position.y, m_velocity, angleRadians);
+
+            if (direction != sf::Vector2f(0, 0))
+            {
+                // Turn towards the direction of the pheromone
+                sf::Vector2f newVelocity = m_velocity + direction * m_turnSpeed;
+                float length = std::sqrt(newVelocity.x * newVelocity.x + newVelocity.y * newVelocity.y);
+                m_velocity = newVelocity / length;
+            }
+           
+
+
+        }
+        else
+        {
+            //follow food pheramones
+            //sf::Vector2f direction = grid.getFoodPheromoneDirection(m_position.x, m_position.y);
+            sf::Vector2f direction = grid.getFoodPheromoneDirectionFO(m_position.x, m_position.y, m_velocity, angleRadians);
+            if (direction != sf::Vector2f(0, 0))
+            {
+                // Turn towards the direction of the pheromone
+                sf::Vector2f newVelocity = m_velocity + direction * m_turnSpeed;
+                float length = std::sqrt(newVelocity.x * newVelocity.x + newVelocity.y * newVelocity.y);
+                m_velocity = newVelocity / length;
+            }
+
+            if (grid.hasfood(m_position.x, m_position.y))
+            {
+                m_velocity *= -1.0f;
+                m_hasFood = true;
+                m_pheromoneAmount = 2000;
+                grid.removeFood(m_position.x, m_position.y, 1);
+            }
         }
 
-        if (grid.hasfood(m_position.x, m_position.y))
-        {
-            m_velocity *= -1.0f;
-            m_hasFood = true;
-            m_pheromoneAmount = 1000;
-            grid.removeFood(m_position.x, m_position.y, 1);
-        }
     }
 
+    if (m_pheromoneAmount < 1950)
+    {
+        sf::Vector2f vectorToColony = m_position - m_colonyPosition;
+        float distanceToColony = std::sqrt(vectorToColony.x * vectorToColony.x + vectorToColony.y * vectorToColony.y);
+        if (distanceToColony < 20)
+        {
+            
+            m_hasFood = false;
+            m_pheromoneAmount = 2000;
 
+            m_position = m_colonyPosition;
+            sf::Vector2f randomDirection(rand() % 201 - 100, rand() % 201 - 100);
+            float length = std::sqrt(randomDirection.x * randomDirection.x + randomDirection.y * randomDirection.y);
+            randomDirection /= length;
+            m_velocity = randomDirection;
+
+        }
+    }
+    
     wander();
-
 
     float movementStep = m_speed * deltaTime.asSeconds();
     int steps = static_cast<int>(std::ceil(movementStep / grid.getCellSize()));
@@ -129,9 +151,11 @@ void Ant::update(sf::Time deltaTime,Grid& grid,int width, int height)
     // If the ant is still within a wall, move it to the nearest empty cell
     if (grid.isWalls(m_position.x, m_position.y))
     {
-        sf::Vector2i emptyCell = grid.findNearestEmptyCell(m_position.x, m_position.y);
-        m_position = sf::Vector2f(static_cast<float>(emptyCell.x), static_cast<float>(emptyCell.y));
+       
+        m_position = m_prevposition;
     }
+
+    m_prevposition = m_position;
 
     m_position += m_velocity * deltaTime.asSeconds() * m_speed;
     m_shape.setPosition(m_position);
