@@ -39,6 +39,15 @@ void AntColony::update(sf::Time deltaTime, Grid& grid, int width, int height)
         ant.update(deltaTime,grid,width,height);
     }
     
+    for (int i = -2; i < 2; i++)
+    {
+        for (int j = -2; j < 2; j++)
+        {
+            grid.addHomePheromone(m_position.x+ i*5, m_position.y+j * 5, 10000);
+        }
+    }
+
+
     grid.addHomePheromone(m_position.x, m_position.y, 10000);
 
 }
