@@ -7,7 +7,8 @@ Grid::Grid(int width, int height, int cellSize, sf::Color homePheromoneColour, s
 	m_height(height / cellSize), 
 	m_cellSize(cellSize),
 	m_homePheromoneColour(homePheromoneColour),
-	m_foodPheromoneColour(foodPheromoneColour)
+	m_foodPheromoneColour(foodPheromoneColour),
+	m_wallColors(m_width* m_height)
 
 {
 	m_cellShape.setSize(sf::Vector2f(m_cellSize, m_cellSize));
@@ -136,7 +137,7 @@ void Grid::draw(sf::RenderWindow& window)
 			//draw walls
 			if (m_walls[gridpos(i, j)])
 			{
-				m_cellShape.setFillColor(sf::Color::White);
+				m_cellShape.setFillColor(m_wallColors[gridpos(i, j)]);
 
 				m_cellShape.setPosition(x, y);
 				window.draw(m_cellShape);
@@ -252,7 +253,7 @@ bool Grid::saveToFile(const std::string& filename) const
 	// Write data
 	file.write(reinterpret_cast<const char*>(m_foodAmount.data()), m_foodAmount.size() * sizeof(float));
 	file.write(reinterpret_cast<const char*>(m_walls.data()), m_walls.size() * sizeof(float));
-
+	file.write(reinterpret_cast<const char*>(m_wallColors.data()), m_wallColors.size() * sizeof(sf::Color));
 
 
 	return true;
@@ -281,7 +282,7 @@ bool Grid::loadFromFile(const std::string& filename)
 	// Read data
 	file.read(reinterpret_cast<char*>(m_foodAmount.data()), m_foodAmount.size() * sizeof(float));
 	file.read(reinterpret_cast<char*>(m_walls.data()), m_walls.size() * sizeof(float));
-
+	file.read(reinterpret_cast<char*>(m_wallColors.data()), m_wallColors.size() * sizeof(sf::Color));
 
 	return true;
 }
@@ -341,6 +342,13 @@ void Grid::diffusePheromones(float homeRate, float foodRate, float homeThreshold
 	m_foodPheromone = newFoodPheromomne;
 
 
+}
+
+sf::Color Grid::getColorFromNoiseValue(float value)
+{
+	int intensity = static_cast<int>((value + 1.0f) * 128); // Map the value from [-1, 1] to [0, 255]
+
+	return sf::Color(intensity, intensity, intensity);
 }
 
 int Grid::windowToGridPos(int x, int y)
@@ -638,13 +646,25 @@ void Grid::generateMap(float wall_threshold, float food_threshold, int food_radi
 			if (value > wall_threshold)
 			{
 				m_walls[gridpos(x, y)] = 1;
+				m_foodAmount[gridpos(x, y)] = 0;
+				m_wallColors[gridpos(x, y)] = getColorFromNoiseValue(value);
 			}
 			else if (value < food_threshold)
 			{
 				
-				m_foodAmount[gridpos(x, y)] += 10;
+				m_foodAmount[gridpos(x, y)] = 50;
+				m_walls[gridpos(x, y)] = 0;
 
 			}
+			else
+			{
+				m_foodAmount[gridpos(x, y)] =0;
+				m_walls[gridpos(x, y)] = 0;
+			}
+			m_homePheromone [gridpos(x, y)]= 0;
+			m_foodPheromone[gridpos(x, y)] = 0;
+
+
 		}
 	}
 

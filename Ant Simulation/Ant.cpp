@@ -105,7 +105,7 @@ void Ant::update(sf::Time deltaTime,Grid& grid,int width, int height)
     for (int i = 0; i < steps; i++)
     {
         sf::Vector2f newPosition = m_position + stepDirection;
-        if (!grid.isWalls(newPosition.x, newPosition.y)) // Add a function in Grid class to check if a wall exists at the given position
+        if (!grid.isWalls(newPosition.x, newPosition.y))
         {
             m_position = newPosition;
         }
@@ -113,7 +113,7 @@ void Ant::update(sf::Time deltaTime,Grid& grid,int width, int height)
         {
             
             m_velocity = -m_velocity;
-            newPosition = m_position + stepDirection * (float)(steps - i - 1); // Update the newPosition with the remaining movement steps
+            newPosition = m_position + stepDirection * (float)(steps - i - 1); 
             if (!grid.isWalls(newPosition.x, newPosition.y))
             {
                 m_position = newPosition;
@@ -127,26 +127,7 @@ void Ant::update(sf::Time deltaTime,Grid& grid,int width, int height)
 
     
 
-    if (m_position.x <= 10)
-    {
-        m_position.x = 10;
-        m_velocity.x = -m_velocity.x;
-    }
-    else if (m_position.x >= width-10)
-    {
-        m_position.x = width-10;
-        m_velocity.x = -m_velocity.x;
-    }
-    if (m_position.y <= 10)
-    {
-        m_position.y = 10;
-        m_velocity.y = -m_velocity.y;
-    }
-    else if (m_position.y >= height-10)
-    {
-        m_position.y = height-10;
-        m_velocity.y = -m_velocity.y;
-    }
+    
 
     // If the ant is still within a wall, move it to the nearest empty cell
     if (grid.isWalls(m_position.x, m_position.y))
@@ -167,7 +148,26 @@ void Ant::update(sf::Time deltaTime,Grid& grid,int width, int height)
     }
    
     
-
+    if (m_position.x <= 0)
+    {
+        m_position.x = 0;
+        m_velocity.x = -m_velocity.x;
+    }
+    else if (m_position.x >= width - 0)
+    {
+        m_position.x = width - 0;
+        m_velocity.x = -m_velocity.x;
+    }
+    if (m_position.y <= 0)
+    {
+        m_position.y = 0;
+        m_velocity.y = -m_velocity.y;
+    }
+    else if (m_position.y >= height - 10)
+    {
+        m_position.y = height - 10;
+        m_velocity.y = -m_velocity.y;
+    }
     
     
 }

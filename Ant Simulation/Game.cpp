@@ -9,27 +9,9 @@ Game::Game()
     m_colony(sf::Vector2f(width / 2, height / 2), 1000, sf::Color::Red),
     m_grid(width, height, 10, sf::Color::Blue, sf::Color::Cyan)
 {
-    m_grid.generateMap(0.4, -0.9, 3);
+   
 
-    sf::Vector2f colonyPosition;
-    bool validPosition = false;
-
-    // Find a valid random position for the colony
-    while (!validPosition)
-    {
-        int randomX = rand() % width;
-        int randomY = rand() % height;
-
-        if (m_grid.isPositionValidForColony(randomX / 10, randomY / 10, 5))
-        {
-            colonyPosition = sf::Vector2f(static_cast<float>(randomX), static_cast<float>(randomY));
-            validPosition = true;
-        }
-    }
-
-    m_colony = AntColony(colonyPosition, 300, sf::Color::Red);
-
-
+   
 }
 
 void Game::Run()
@@ -137,33 +119,60 @@ void Game::render()
 
 void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed)
 {
+    if (isPressed) 
+    {
+        if (key == sf::Keyboard::Period)
+        {
+            if (m_simSpeed < 4)
+            {
+                m_simSpeed++;
+            }
+
+        }
+        if (key == sf::Keyboard::Comma)
+        {
+            if (m_simSpeed > 0)
+            {
+                m_simSpeed--;
+            }
+        }
+        if (key == sf::Keyboard::Space)
+        {
+            running = true;
+        }
+        if (key == sf::Keyboard::S)
+        {
+            m_grid.saveToFile("grid.bin");
+        }
+        if (key == sf::Keyboard::L)
+        {
+            m_grid.loadFromFile("grid.bin");
+        }
+        if (key == sf::Keyboard::G)
+        {
+            m_grid.generateMap(0.4, -0.9, 3);
+
+            sf::Vector2f colonyPosition;
+            bool validPosition = false;
+
+            // Find a valid random position for the colony
+            while (!validPosition)
+            {
+                int randomX = rand() % width;
+                int randomY = rand() % height;
+
+                if (m_grid.isPositionValidForColony(randomX / 10, randomY / 10, 5))
+                {
+                    colonyPosition = sf::Vector2f(static_cast<float>(randomX), static_cast<float>(randomY));
+                    validPosition = true;
+                }
+            }
+
+            m_colony = AntColony(colonyPosition, 500, sf::Color::Red);
+        }
+    }
 
 
-    if (key == sf::Keyboard::Period)
-    {
-        if (m_simSpeed < 4)
-        {
-            m_simSpeed++;
-        }
-       
-    }
-    if (key == sf::Keyboard::Comma)
-    {
-        if (m_simSpeed > 0)
-        {
-            m_simSpeed--;
-        }
-    }
-    if (key == sf::Keyboard::Space)
-    {
-        running = true;
-    }
-    if (key == sf::Keyboard::S)
-    {
-        m_grid.saveToFile("grid.bin");
-    }
-    if (key == sf::Keyboard::L)
-    {
-        m_grid.loadFromFile("grid.bin");
-    }
+
+    
 }

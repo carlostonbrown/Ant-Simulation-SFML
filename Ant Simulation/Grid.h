@@ -44,9 +44,11 @@ private:
 	std::vector<float> m_homePheromone;
 	std::vector<float> m_foodAmount;
 	std::vector<float> m_walls;
+	std::vector<sf::Color>m_wallColors;
 
 	int gridpos(int x, int y);
 	void diffusePheromones(float homeRate,float foodRate, float homeThreshold, float foodThreshold);
+	sf::Color getColorFromNoiseValue(float value);
 
 
 	
