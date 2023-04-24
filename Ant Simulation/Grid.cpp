@@ -303,7 +303,7 @@ void Grid::diffusePheromones(float homeRate, float foodRate, float homeThreshold
 		for (int y = 0; y < m_height; y++)
 		{
 			if (m_walls[gridpos(x, y)]) continue;
-			if (m_foodAmount[gridpos(x, y)]) continue;
+			//if (m_foodAmount[gridpos(x, y)]) continue;
 
 			float totalHomeLevel = m_homePheromone[gridpos(x, y)];
 			float totalFoodLevel = m_foodPheromone[gridpos(x, y)];
@@ -313,7 +313,7 @@ void Grid::diffusePheromones(float homeRate, float foodRate, float homeThreshold
 					int nx = x + dx;
 					int ny = y + dy;
 					if (nx < 0 || nx >= m_width || ny < 0 || ny >= m_height) continue;
-					if (m_foodAmount[gridpos(nx, ny)]) continue;
+					//if (m_foodAmount[gridpos(nx, ny)]) continue;
 
 					totalHomeLevel += m_homePheromone[gridpos(nx,ny)];
 					totalFoodLevel += m_foodPheromone[gridpos(nx,ny)];
@@ -618,4 +618,56 @@ sf::Vector2i Grid::findNearestEmptyCell(int x, int y)
 float Grid::getCellSize()
 {
 	return m_cellSize;
+}
+
+void Grid::generateMap(float wall_threshold, float food_threshold, int food_radius)
+{
+	FastNoiseLite noise;
+	noise.SetSeed(rand());
+	noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+
+	noise.SetFrequency(0.3);
+
+	// Generate walls and food sources using Perlin noise
+	for (int y = 0; y < m_height; y++)
+	{
+		for (int x = 0; x < m_width; x++)
+		{
+			float value = noise.GetNoise(static_cast<float>(x) / 10, static_cast<float>(y) / 10);
+
+			if (value > wall_threshold)
+			{
+				m_walls[gridpos(x, y)] = 1;
+			}
+			else if (value < food_threshold)
+			{
+				
+				m_foodAmount[gridpos(x, y)] += 10;
+
+			}
+		}
+	}
+
+}
+
+bool Grid::isPositionValidForColony(int x, int y, int minDistance)
+{
+	for (int i = -minDistance; i <= minDistance; i++)
+	{
+		for (int j = -minDistance; j <= minDistance; j++)
+		{
+			int newX = x + i;
+			int newY = y + j;
+
+			if (newX >= 0 && newX < m_width && newY >= 0 && newY < m_height)
+			{
+				if (m_walls[gridpos(newX, newY)] || m_foodAmount[gridpos(newX, newY)] > 0)
+				{
+					return false;
+				}
+			}
+		}
+	}
+
+	return true;
 }

@@ -22,10 +22,10 @@ private:
     float m_pheromoneAmount;
     float decay = 100;
     float m_speed;
-    float m_turnSpeed = 0.15;
-    float m_pheromoneAngle = 60;
+    float m_turnSpeed = 0.1;
+    float m_pheromoneAngle = 45;
     float angleRadians = m_pheromoneAngle / 57.2957795;
-    float m_wanderProbability = 0.2f;
+    float m_wanderProbability = 0.01;
     bool m_hasFood;
 };
 

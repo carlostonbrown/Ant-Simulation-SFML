@@ -1,6 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
-
+#include "FastNoiseLite.h"
 #pragma once
 class Grid
 {
@@ -26,10 +26,12 @@ public:
 	sf::Vector2f getCellNormal(int x, int y);
 	sf::Vector2i findNearestEmptyCell(int x, int y);
 	float getCellSize();
+	void generateMap(float wall_threshold, float food_threshold, int food_radius);
+	bool isPositionValidForColony(int x, int y, int minDistance);
 
 private:
 
-	float foodDecay = 0.90f;
+	float foodDecay = 0.50f;
 	float homeDecay = 0.90f;
 	int m_width;
 	int m_height;

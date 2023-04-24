@@ -9,8 +9,8 @@ public:
     void Run();
 
 private:
-    int width = 1000;
-    int height = 1000;
+    int width = 1500;
+    int height = 900;
     float m_simSpeed = 1;
     bool running = false;
     sf::RenderWindow window;

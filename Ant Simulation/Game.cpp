@@ -6,12 +6,28 @@ const sf::Time Game::TimePerFrame = sf::seconds(1.f / 144.f);
 
 Game::Game()
     : window(sf::VideoMode(width, height), "Ant Simulation"),
-    m_colony(sf::Vector2f(width / 2, height / 2), 500, sf::Color::Red),
+    m_colony(sf::Vector2f(width / 2, height / 2), 1000, sf::Color::Red),
     m_grid(width, height, 10, sf::Color::Blue, sf::Color::Cyan)
 {
-    //m_grid.generateMap(0.4, -0.01, 3);
+    m_grid.generateMap(0.4, -0.9, 3);
 
-    
+    sf::Vector2f colonyPosition;
+    bool validPosition = false;
+
+    // Find a valid random position for the colony
+    while (!validPosition)
+    {
+        int randomX = rand() % width;
+        int randomY = rand() % height;
+
+        if (m_grid.isPositionValidForColony(randomX / 10, randomY / 10, 5))
+        {
+            colonyPosition = sf::Vector2f(static_cast<float>(randomX), static_cast<float>(randomY));
+            validPosition = true;
+        }
+    }
+
+    m_colony = AntColony(colonyPosition, 300, sf::Color::Red);
 
 
 }
