@@ -1,24 +1,25 @@
 #include "Game.h"
 #include <ctime>
 #include <iostream>
+
+//set the framerate
 const sf::Time Game::TimePerFrame = sf::seconds(1.f / 144.f);
 
-
+// Game constructor
 Game::Game()
     : window(sf::VideoMode(width, height), "Ant Simulation"),
     m_colony(sf::Vector2f(width / 2, height / 2), 1000, sf::Color::Red),
     m_grid(width, height, 10, sf::Color::Blue, sf::Color::Cyan)
 {
-   
-
-   
 }
 
+// Main game loop
 void Game::Run()
 {
     sf::Clock clock;
     sf::Time timeSinceLastUpdate = sf::Time::Zero;
 
+    // Continue running while the window is open
     while (window.isOpen())
     {
 
@@ -45,6 +46,7 @@ void Game::Run()
 
 }
 
+// Process window events, such as mouse clicks and key presses
 void Game::processEvents()
 {
     sf::Event event{};
@@ -53,6 +55,7 @@ void Game::processEvents()
     {
         switch (event.type)
         {
+            // Add food or walls based on the pressed mouse button
         case sf::Event::MouseButtonPressed:
             if (event.mouseButton.button == sf::Mouse::Left)
             {
@@ -67,6 +70,8 @@ void Game::processEvents()
                 m_grid.addFood(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y, 0);
                 m_grid.addWalls(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y,0);
             }
+            break;
+            // Add food or walls based on the pressed mouse button while moving the mouse
         case sf::Event::MouseMoved:
 
             if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
@@ -83,13 +88,15 @@ void Game::processEvents()
                 m_grid.addFood(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y, 0);
                 m_grid.addWalls(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y, 0);
             }
-
+            break;
+            // Handle key presses and releases
         case sf::Event::KeyPressed:
             handlePlayerInput(event.key.code, true);
             break;
         case sf::Event::KeyReleased:
             handlePlayerInput(event.key.code, false);
             break;
+            // Close the window
         case sf::Event::Closed:
             window.close();
             break;
@@ -99,7 +106,7 @@ void Game::processEvents()
 
     }
 }
-
+// Update the game state based on the elapsed time
 void Game::update(sf::Time deltaTime)
 {
     m_colony.update(deltaTime,m_grid,width,height);
@@ -108,6 +115,7 @@ void Game::update(sf::Time deltaTime)
 
 }
 
+// Render the game elements
 void Game::render()
 {
     window.clear();
@@ -117,10 +125,12 @@ void Game::render()
     window.display();
 }
 
+// Handle player input (key presses)
 void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed)
 {
     if (isPressed) 
     {
+        // Increase simulation speed
         if (key == sf::Keyboard::Period)
         {
             if (m_simSpeed < 4)
@@ -129,6 +139,7 @@ void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed)
             }
 
         }
+        // Decrease simulation speed
         if (key == sf::Keyboard::Comma)
         {
             if (m_simSpeed > 0)
@@ -136,21 +147,26 @@ void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed)
                 m_simSpeed--;
             }
         }
+        // Start the simulation
         if (key == sf::Keyboard::Space)
         {
             running = true;
         }
+        // Save the grid state to a file
         if (key == sf::Keyboard::S)
         {
-            m_grid.saveToFile("grid.bin");
+            m_grid.saveToFile("grid.bin",m_colony.getPosition());
         }
+        // Load the grid state from a file
         if (key == sf::Keyboard::L)
         {
-            m_grid.loadFromFile("grid.bin");
+           m_colony = AntColony(m_grid.loadFromFile("grid.bin", m_colony.getPosition()), 500, sf::Color::Red);
+           
         }
+        // Generate a new map
         if (key == sf::Keyboard::G)
         {
-            m_grid.generateMap(0.4, -0.9, 3);
+            m_grid.generateMap(0.4, -0.9, 3.0f);
 
             sf::Vector2f colonyPosition;
             bool validPosition = false;
@@ -168,7 +184,7 @@ void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed)
                 }
             }
 
-            m_colony = AntColony(colonyPosition, 500, sf::Color::Red);
+            m_colony = AntColony(colonyPosition, 10, sf::Color::Red);
         }
     }
 

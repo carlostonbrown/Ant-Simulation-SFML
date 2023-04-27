@@ -14,8 +14,8 @@ public:
 	void addFood(int x, int y, float amount);
 	void addWalls(int x, int y,float amount);
 	void removeFood(int x, int y, float amount);
-	bool saveToFile(const std::string& filename) const;
-	bool loadFromFile(const std::string& filename);
+	bool saveToFile(const std::string& filename, sf::Vector2f position) const;
+	sf::Vector2f loadFromFile(const std::string& filename, sf::Vector2f position);
 	int windowToGridPos(int x, int y);
 	bool hasfood(int x, int y);
 	bool isWalls(int x, int y);
@@ -31,8 +31,8 @@ public:
 
 private:
 
-	float foodDecay = 0.50f;
-	float homeDecay = 0.90f;
+	float foodDecay = 0.60f;
+	float homeDecay = 0.80f;
 	int m_width;
 	int m_height;
 	int m_cellSize;
