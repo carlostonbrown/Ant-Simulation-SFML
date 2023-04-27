@@ -11,6 +11,7 @@ public:
 private:
     int width = 1500;
     int height = 900;
+    int cellsize = 10;
     float m_simSpeed = 1;
     bool running = false;
     sf::RenderWindow window;

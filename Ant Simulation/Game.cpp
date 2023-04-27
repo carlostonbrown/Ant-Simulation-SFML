@@ -9,7 +9,7 @@ const sf::Time Game::TimePerFrame = sf::seconds(1.f / 144.f);
 Game::Game()
     : window(sf::VideoMode(width, height), "Ant Simulation"),
     m_colony(sf::Vector2f(width / 2, height / 2), 1000, sf::Color::Red),
-    m_grid(width, height, 10, sf::Color::Blue, sf::Color::Cyan)
+    m_grid(width, height, cellsize, sf::Color::Blue, sf::Color::Cyan)
 {
 }
 
@@ -176,8 +176,8 @@ void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed)
             {
                 int randomX = rand() % width;
                 int randomY = rand() % height;
-
-                if (m_grid.isPositionValidForColony(randomX / 10, randomY / 10, 5))
+                
+                if (m_grid.isPositionValidForColony(randomX / cellsize, randomY / cellsize, 5))
                 {
                     colonyPosition = sf::Vector2f(static_cast<float>(randomX), static_cast<float>(randomY));
                     validPosition = true;
