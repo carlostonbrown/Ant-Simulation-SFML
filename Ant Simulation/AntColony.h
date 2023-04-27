@@ -20,7 +20,7 @@ private:
     sf::Vector2f m_position;
     std::vector<Ant> m_ants;
     int food =0;
-    int antCountMax =750;
+    int antCountMax =5000;
 
 
     

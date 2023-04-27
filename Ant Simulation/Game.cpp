@@ -184,7 +184,7 @@ void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed)
                 }
             }
 
-            m_colony = AntColony(colonyPosition, 10, sf::Color::Red);
+            m_colony = AntColony(colonyPosition, 1000, sf::Color::Red);
         }
     }
 

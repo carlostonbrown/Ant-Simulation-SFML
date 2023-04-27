@@ -73,7 +73,7 @@ void AntColony::update(sf::Time deltaTime, Grid& grid, int width, int height)
         }
     }
     // If the colony has enough food, spawn a new ant
-    if (food > 5)
+    if (food > 4)
     {
         spawnAnt();
         food = 0;
